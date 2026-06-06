@@ -5,6 +5,8 @@ import { OrderForm } from './pages/OrderForm';
 import { Confirmation } from './pages/Confirmation';
 import { AdminLogin } from './pages/AdminLogin';
 import { AdminDashboard } from './pages/AdminDashboard';
+import whatsappImg from './assets/whatsapp.png';
+
 type Step = 'selection' | 'form' | 'confirmation';
 
 function AppContent() {
@@ -50,6 +52,17 @@ function AppContent() {
           </div>
         </div>
       </footer>
+
+      {/* Floating WhatsApp Button */}
+      <a 
+        href="https://wa.me/2290167415954" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 hover:scale-110 transition-transform duration-300 drop-shadow-2xl"
+        title="Contactez-nous sur WhatsApp"
+      >
+        <img src={whatsappImg} alt="WhatsApp" className="w-20 h-20 object-contain drop-shadow-lg" />
+      </a>
     </div>
   );
 }

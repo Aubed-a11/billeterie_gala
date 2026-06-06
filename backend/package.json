@@ -12,11 +12,16 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@types/qrcode": "^1.5.6",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3"
+    "jimp": "^0.22.12",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
+    "nodemailer": "^8.0.7",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "@prisma/client": "^5.22.0",
@@ -24,7 +29,9 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.1.0",
     "@types/node": "^25.6.0",
+    "@types/nodemailer": "^8.0.0",
     "prisma": "^5.22.0",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3"

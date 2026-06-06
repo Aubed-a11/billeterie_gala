@@ -1,4 +1,4 @@
-export type PackType = 'Cuivre' | 'Bronze' | 'Argent' | 'Or' | 'Diamant';
+export type PackType = 'StandardEtudiant' | 'StandardProfessionnel' | 'VIP';
 
 export type Pack = {
   id: PackType;
@@ -15,56 +15,43 @@ export type Beneficiary = {
   cin: string;
 };
 
-export type OrderData = {
+export interface OrderData {
+  id?: string;
   nom: string;
   prenom: string;
   email: string;
   cin: string;
-  idAsebem: string;
-  pack: PackType;
+  isBeninois: boolean;
+  idAsebem?: string;
+  pack: string;
   nombrePersonnes: number;
+  receiptUrl?: string;
   beneficiaires: Beneficiary[];
 };
 
 export const PACKS: Pack[] = [
   {
-    id: 'Cuivre',
-    name: 'Cuivre',
+    id: 'StandardEtudiant',
+    name: 'Ticket Standard Étudiant',
     price: 200,
     maxPeople: 1,
-    description: 'Accès standard pour une personne.',
+    description: 'Accès standard pour étudiant.',
     color: 'border-[#CD7F32] bg-[#CD7F32]/10 text-[#CD7F32]',
   },
   {
-    id: 'Bronze',
-    name: 'Bronze',
+    id: 'StandardProfessionnel',
+    name: 'Ticket Standard Professionnel',
     price: 300,
     maxPeople: 1,
-    description: 'Accès privilégié pour une personne.',
+    description: 'Accès standard pour professionnel.',
     color: 'border-[#b87333] bg-[#b87333]/10 text-[#b87333]',
   },
   {
-    id: 'Or',
-    name: 'Or',
-    price: 500,
-    maxPeople: 1,
-    description: 'Expérience premium pour une personne.',
+    id: 'VIP',
+    name: 'Ticket VIP',
+    price: 2000,
+    maxPeople: 6,
+    description: 'Table VIP pour 6 personnes.',
     color: 'border-[#FFD700] bg-[#FFD700]/10 text-[#FFD700]',
-  },
-  {
-    id: 'Argent',
-    name: 'Argent (VIP)',
-    price: 1500,
-    maxPeople: 6,
-    description: 'Table VIP pour jusqu\'à 6 personnes.',
-    color: 'border-[#C0C0C0] bg-[#C0C0C0]/10 text-[#C0C0C0]',
-  },
-  {
-    id: 'Diamant',
-    name: 'Diamant (VIP Prestige)',
-    price: 3000,
-    maxPeople: 6,
-    description: 'L\'expérience ultime pour jusqu\'à 6 personnes.',
-    color: 'border-[#B9F2FF] bg-[#B9F2FF]/10 text-[#B9F2FF]',
-  },
+  }
 ];

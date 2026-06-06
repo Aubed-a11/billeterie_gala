@@ -13,10 +13,12 @@ model Order {
   prenom          String
   email           String
   cin             String
-  idAsebem        String
+  idAsebem        String?
+  isBeninois      Boolean       @default(true)
   pack            String
   nombrePersonnes Int
   status          String        @default("EN_ATTENTE")
+  receiptUrl      String?
   createdAt       DateTime      @default(now())
   beneficiaires   Beneficiary[]
 }

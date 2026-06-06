@@ -11,6 +11,7 @@ interface Order {
   pack: string;
   nombrePersonnes: number;
   status: string;
+  receiptUrl?: string;
   createdAt: string;
   beneficiaires: any[];
 }
@@ -23,6 +24,7 @@ interface AdminDashboardProps {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ token, onLogout }) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [processingAction, setProcessingAction] = useState<{ id: string, status: string } | null>(null);
 
   const fetchOrders = async () => {
     try {
@@ -40,6 +42,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ token, onLogout 
   }, [token]);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
+    setProcessingAction({ id: orderId, status: newStatus });
     try {
       await updateOrderStatus(token, orderId, newStatus);
       if (newStatus === 'VALIDE') {
@@ -47,9 +50,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ token, onLogout 
       } else if (newStatus === 'ANNULE') {
         alert("Commande annulée de manière irréversible.");
       }
-      fetchOrders();
+      await fetchOrders();
     } catch (err) {
       alert('Erreur lors de la mise à jour du statut');
+    } finally {
+      setProcessingAction(null);
     }
   };
 
@@ -87,6 +92,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ token, onLogout 
                 <div className="text-sm text-white/60 space-y-1">
                   <p>{order.email} • Pack: <span className="text-gala-gold font-medium">{order.pack}</span> ({order.nombrePersonnes} place{order.nombrePersonnes > 1 ? 's' : ''})</p>
                   <p className="text-xs">Date: {new Date(order.createdAt).toLocaleString('fr-FR')}</p>
+                  {order.receiptUrl && (
+                    <a href={`http://localhost:3000${order.receiptUrl}`} target="_blank" rel="noopener noreferrer" className="inline-block mt-2 text-primary-400 hover:text-primary-300 underline text-sm">
+                      Voir le reçu de paiement
+                    </a>
+                  )}
                 </div>
               </div>
 
@@ -94,12 +104,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ token, onLogout 
                 <div className="flex items-center gap-2">
                   <Button
                     onClick={() => handleStatusChange(order.id, 'VALIDE')}
+                    isLoading={processingAction?.id === order.id && processingAction?.status === 'VALIDE'}
+                    disabled={processingAction !== null}
                     className="bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30"
                   >
                     Valider
                   </Button>
                   <Button
                     onClick={() => handleStatusChange(order.id, 'ANNULE')}
+                    isLoading={processingAction?.id === order.id && processingAction?.status === 'ANNULE'}
+                    disabled={processingAction !== null}
                     className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30"
                   >
                     Annuler

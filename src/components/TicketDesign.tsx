@@ -18,49 +18,33 @@ interface TicketDesignProps {
 export const TicketDesign = forwardRef<HTMLDivElement, TicketDesignProps>(({ data }, ref) => {
   // Mapping des détails par pack pour correspondre au design
   const packDetails = {
-    'Cuivre': {
-      label: 'CUIVRE',
-      sub: 'Simple',
+    'StandardEtudiant': {
+      label: 'ÉTUDIANT',
+      sub: 'Standard',
       features: ['Accès Gala'],
       color: 'bg-[#b67954]', // fallback color for overlay
       overlay: 'from-[#C48663]/90 to-[#b67954]/90',
       price: 200,
     },
-    'Bronze': {
-      label: 'BRONZE',
-      sub: '+ Déplacement',
-      features: ['Accès Gala', 'Déplacement pris en charge'],
+    'StandardProfessionnel': {
+      label: 'PROFESSIONNEL',
+      sub: 'Standard',
+      features: ['Accès Gala'],
       color: 'bg-[#a76a44]',
       overlay: 'from-[#b07049]/90 to-[#995c37]/90',
       price: 300,
     },
-    'Argent': {
-      label: 'ARGENT',
-      sub: 'VIP',
+    'VIP': {
+      label: 'VIP',
+      sub: 'Table 6 pers.',
       features: ['Accès Gala VIP', '6 places réservées'],
-      color: 'bg-[#708090]',
-      overlay: 'from-[#8b9bb4]/90 to-[#607086]/90',
-      price: 1500,
-    },
-    'Or': {
-      label: 'OR',
-      sub: '+ Menu',
-      features: ['Accès Gala', 'Déplacement', 'Menu du jour'],
       color: 'bg-[#c5a059]',
       overlay: 'from-[#d4b065]/90 to-[#b89146]/90',
-      price: 500,
-    },
-    'Diamant': {
-      label: 'DIAMANT',
-      sub: 'VIP Prestige',
-      features: ['Accès Gala VIP', 'Déplacement', 'Menu du jour', '6 pers.'],
-      color: 'bg-[#6b678c]',
-      overlay: 'from-[#767399]/90 to-[#5a567a]/90',
-      price: 3000,
+      price: 2000,
     }
   };
 
-  const details = packDetails[data.pack as keyof typeof packDetails] || packDetails['Cuivre'];
+  const details = packDetails[data.pack as keyof typeof packDetails] || packDetails['StandardEtudiant'];
 
   // This statue image is the one provided by the user, we assume it's saved in public/statue-bg.png
   const bgImage = '/statue-bg.png';

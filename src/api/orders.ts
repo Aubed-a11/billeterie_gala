@@ -13,3 +13,19 @@ export const createOrder = async (orderData: OrderData) => {
     throw error;
   }
 };
+
+export const uploadReceipt = async (orderId: string, file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append('receipt', file);
+    const response = await axios.post(`${API_URL}/orders/${orderId}/receipt`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de l'upload du reçu:", error);
+    throw error;
+  }
+};

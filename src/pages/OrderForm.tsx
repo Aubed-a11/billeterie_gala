@@ -6,8 +6,9 @@ import { useOrder } from '../context/OrderContext';
 import { PACKS } from '../models';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
-import { ArrowLeft, User, Users, AlertCircle } from 'lucide-react';
+import { CheckCircle, AlertCircle, ArrowLeft, User, Users } from 'lucide-react';
 import { createOrder } from '../api/orders';
+import { PaymentStep } from '../components/PaymentStep';
 import { cn } from '../utils/cn';
 
 interface OrderFormProps {
@@ -19,6 +20,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({ onBack, onSuccess }) => {
   const { selectedPack, setOrderResult, setLastOrderData } = useOrder();
   const packInfo = PACKS.find(p => p.id === selectedPack);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
 
   const {
     register,
@@ -30,7 +33,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({ onBack, onSuccess }) => {
   } = useForm<OrderSchemaType>({
     resolver: zodResolver(orderSchema),
     defaultValues: {
-      pack: selectedPack || 'Cuivre',
+      isBeninois: true,
+      pack: selectedPack || 'StandardEtudiant',
       nombrePersonnes: 1,
       beneficiaires: [],
     },
@@ -42,12 +46,12 @@ export const OrderForm: React.FC<OrderFormProps> = ({ onBack, onSuccess }) => {
   });
 
   const nombrePersonnes = watch("nombrePersonnes");
+  const isBeninois = watch("isBeninois");
 
-  // Sync beneficiaries array size with nombrePersonnes
   useEffect(() => {
     if (packInfo && packInfo.maxPeople > 1) {
       const currentBeneficiaries = watch("beneficiaires") || [];
-      const targetCount = Math.max(0, nombrePersonnes - 1); // exclude main applicant
+      const targetCount = Math.max(0, nombrePersonnes - 1);
       
       if (currentBeneficiaries.length < targetCount) {
         for (let i = currentBeneficiaries.length; i < targetCount; i++) {
@@ -66,15 +70,43 @@ export const OrderForm: React.FC<OrderFormProps> = ({ onBack, onSuccess }) => {
   const onSubmit = async (data: OrderSchemaType) => {
     try {
       setApiError(null);
-      const result = await createOrder(data);
+      const result = await createOrder(data as any);
       setOrderResult(result);
       setLastOrderData(data);
-      onSuccess();
+      setCreatedOrderId(result.orderId);
+      setStep(2);
     } catch (error) {
       console.error("API Error:", error);
       setApiError("Impossible de se connecter au serveur. Assurez-vous que l'API distante est en ligne.");
     }
   };
+
+  if (step === 2 && createdOrderId) {
+    return (
+      <div className="pt-32 pb-24 px-4 min-h-screen relative z-10">
+        <PaymentStep 
+          orderId={createdOrderId} 
+          onSuccess={() => setStep(3)} 
+        />
+      </div>
+    );
+  }
+
+  if (step === 3) {
+    return (
+      <div className="pt-32 pb-24 px-4 min-h-screen relative z-10">
+        <div className="max-w-2xl mx-auto glass-card p-12 rounded-3xl text-center space-y-6">
+          <div className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-8 border border-green-500/30">
+            <CheckCircle className="w-12 h-12 text-green-400" />
+          </div>
+          <h2 className="text-3xl font-serif text-gala-gold">Paiement en cours de vérification</h2>
+          <p className="text-lg text-slate-300 leading-relaxed">
+            Votre confirmation de paiement a été prise en compte. Veuillez patienter pendant que l'administrateur vérifie votre transaction. Une fois validée, vous recevrez un e-mail contenant votre ticket.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (!packInfo) return null;
 
@@ -112,6 +144,37 @@ export const OrderForm: React.FC<OrderFormProps> = ({ onBack, onSuccess }) => {
                 <h3 className="text-lg font-serif text-white">Informations principales</h3>
               </div>
 
+              <div className="space-y-4 pb-4 border-b border-slate-700/50">
+                <label className="block text-sm font-medium text-slate-300">Quelle est votre nationalité ?</label>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name="isBeninois"
+                      onChange={() => {
+                        setValue("isBeninois", true, { shouldValidate: true });
+                      }}
+                      checked={isBeninois === true}
+                      className="accent-[#C5A059] w-4 h-4"
+                    />
+                    <span className="text-white">Béninoise</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name="isBeninois"
+                      onChange={() => {
+                        setValue("isBeninois", false, { shouldValidate: true });
+                        setValue("idAsebem", "", { shouldValidate: true });
+                      }}
+                      checked={isBeninois === false}
+                      className="accent-[#C5A059] w-4 h-4"
+                    />
+                    <span className="text-white">Autre</span>
+                  </label>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
                   label="Nom"
@@ -142,12 +205,14 @@ export const OrderForm: React.FC<OrderFormProps> = ({ onBack, onSuccess }) => {
                   {...register("cin")}
                   error={errors.cin?.message}
                 />
-                <Input
-                  label="ID ASEBEM"
-                  placeholder="Votre ID de membre"
-                  {...register("idAsebem")}
-                  error={errors.idAsebem?.message}
-                />
+                {isBeninois && (
+                  <Input
+                    label="ID ASEBEM"
+                    placeholder="Ex: ASEBEM-2026-A41755"
+                    {...register("idAsebem")}
+                    error={errors.idAsebem?.message}
+                  />
+                )}
               </div>
 
               {packInfo.maxPeople > 1 && (
@@ -234,21 +299,21 @@ export const OrderForm: React.FC<OrderFormProps> = ({ onBack, onSuccess }) => {
             <div className="glass-card p-6 rounded-3xl border-gala-gold/30">
               <h3 className="text-lg font-serif text-white mb-6">Récapitulatif</h3>
               <div className="space-y-4">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-400">Pack sélectionné</span>
-                  <span className={cn("font-bold", packInfo.color.split(' ')[2])}>{packInfo.name}</span>
+                <div className="flex justify-between items-start gap-4 text-sm">
+                  <span className="text-slate-400 shrink-0">Pack sélectionné</span>
+                  <span className={cn("font-bold text-right", packInfo.color.split(' ')[2])}>{packInfo.name}</span>
                 </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-400">Nombre de places</span>
-                  <span className="text-white font-medium">{nombrePersonnes}</span>
+                <div className="flex justify-between items-start gap-4 text-sm">
+                  <span className="text-slate-400 shrink-0">Nombre de places</span>
+                  <span className="text-white font-medium text-right">{nombrePersonnes}</span>
                 </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-400">Prix unitaire</span>
-                  <span className="text-white font-medium">{packInfo.price} DHS</span>
+                <div className="flex justify-between items-start gap-4 text-sm">
+                  <span className="text-slate-400 shrink-0">Prix unitaire</span>
+                  <span className="text-white font-medium text-right">{packInfo.price} DHS</span>
                 </div>
                 <div className="pt-4 border-t border-slate-700/50 flex justify-between items-center">
                   <span className="text-white font-bold">Total</span>
-                  <span className="text-2xl font-serif text-gala-gold">{packInfo.price} DHS</span>
+                  <span className="text-2xl font-serif text-gala-gold">{packInfo.price * nombrePersonnes} DHS</span>
                 </div>
               </div>
             </div>
